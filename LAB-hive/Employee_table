@@ -1,0 +1,89 @@
+
+#1. Create an external table named  with the following attributes
+ #-> Empl_ID    ->Emp_Name    -> Designation    -> Salary        
+#2. Load data into table from a given file
+#3. Create a view to Generate a query to retrieve the employee details who earn a salary of more than Rs 30000.             
+#4. Alter the table to add a column Dept_Id and Generate a query to retrieve the employee details in order by using Dept_Id
+#5. Generate a query to retrieve the number of employees in each department whose salary is greater than 30000
+#6. Create another table Department with attributes
+#-> Dept_Id     ->Dept_name    ->Emp_Id
+#7.Display the cumulative details of each employee along with department details
+
+
+
+
+riyanchhi@riyanchhi:~$hive
+hive> use Employee;
+OK
+hive> create external table if not exists Employee (Empl_ID int, Emp_Name String, Designation String, Salary int) row format delimited fields terminated by ',' lines terminated by '\n';
+OK
+hive> load data local inpath '/home/raghavendra/Desktop/employee.txt' overwrite into table Employee;
+Loading data to table employee.employee
+OK
+Time taken: 1.309 seconds
+hive> select * from Employee;
+OK
+1101	Riyanchhi	Manager	45000
+1102	Rani H S	Developer	40000
+1103	Ozymandias	Analyst	35000
+1104	Nandini	Operations	25000
+Time taken: 2.442 seconds, Fetched: 4 row(s)
+hive> create view Employee_view as select * from Employee where Salary>30000;
+OK
+Time taken: 0.521 seconds
+hive> select * from Employee_view;
+OK
+1101	Riyanchhi	Manager	45000
+1102	Rani H S	Developer	40000
+1103	Ozymandias	Analyst	35000
+Time taken: 0.297 seconds, Fetched: 3 row(s)
+hive> alter table Employee add columns (Dept_ID int);
+OK
+Time taken: 0.109 seconds
+hive> load data local inpath '/home/raghavendra/Desktop/employee_dept.txt' overwrite into table Employee;
+Loading data to table employee.employee
+OK
+Time taken: 0.403 seconds
+hive> select * from Employee order by Dept_ID;
+OK
+1104	Nandini	Operations	25000	8
+1103	Ozymandias	Analyst	35000	8
+1102	Rani H S	Developer	40000	10
+1101	Riyanchhi	Manager	45000	10
+Time taken: 25.06 seconds, Fetched: 4 row(s)
+
+hive> select count(*),Dept_ID from Employee where Salary > 30000 group by Dept_ID;
+OK
+1	8
+2	10
+Time taken: 23.488 seconds, Fetched: 2 row(s)
+hive> create table if not exists Department (Dept_ID int , Dept_name String, Emp_ID int) row format delimited fields terminated by ',' lines terminated by '\n';
+OK
+Time taken: 0.197 seconds
+hive> load data local inpath '/home/raghavendra/Desktop/dept.txt' overwrite into table Department;
+Loading data to table employee.department
+OK
+Time taken: 0.327 seconds
+hive> select * from Department;
+OK
+8	Marketing	1103
+8	Marketing	1104
+10	Development	1101
+10	Development	1102
+Time taken: 0.141 seconds, Fetched: 4 row(s)
+hive> select e.Empl_ID, e.Emp_Name, e.Designation, e.Salary, e.Dept_ID, d.Dept_Name from Employee e join Department d ON (d.Dept_ID = e.Dept_ID);
+OK
+1101	Riyanchhi	Manager	45000	10	Development
+1101	Riyanchhi	Manager	45000	10	Development
+1102	Rani H s	Developer	40000	10	Development
+1102	Rani H s	Developer	40000	10	Development
+1103	Ozymandias	Analyst	35000	8	Marketing
+1103	Ozymandias	Analyst	35000	8	Marketing
+1104	Nandini	Operations	25000	8	Marketing
+1104	Nandini	Operations	25000	8	Marketing
+Time taken: 24.312 seconds, Fetched: 8 row(s)
+
+
+
+
+
